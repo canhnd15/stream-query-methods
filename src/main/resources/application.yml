@@ -1,0 +1,23 @@
+server:
+  port: 8090
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/test-db
+    username: admin
+    password: admin
+    initialize: true
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          batch_size: 50
+        order_updates: true
+        order_inserts: true
+    hibernate:
+      ddl-auto: none
+  sql:
+    init:
+      schema-locations: classpath:schema.sql
+      mode: always
