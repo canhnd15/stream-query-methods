@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.AbstractMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -18,18 +19,29 @@ public class CustomerOrderService {
     private final CustomerRepository customerRepository;
 
     @Transactional(readOnly = true)
-    public Map<String, Double> getCustomerOrderSummary(LocalDateTime startDate, Double minOrderAmount) {
-        try (Stream<Customer> customerStream = customerRepository.findCustomerWithOrders(startDate)) {
+    public Map<String, Double> getCustomerOrderSummaryByStream(LocalDateTime startDate, Double minOrderAmount) {
+        try (Stream<Customer> customerStream = customerRepository.findCustomerWithOrdersWithStream(startDate)) {
             return customerStream
-                    // Filter customers with orders above the threshold
                     .flatMap(customer -> customer.getOrders().stream()
                             .filter(order -> order.getAmount() >= minOrderAmount)
                             .map(order -> new AbstractMap.SimpleEntry<>(customer.getName(), order.getAmount())))
-                    // Group by customer name and sum order amounts
                     .collect(Collectors.groupingBy(
                             AbstractMap.SimpleEntry::getKey,
                             Collectors.summingDouble(AbstractMap.SimpleEntry::getValue)
                     ));
         }
+    }
+
+    @Transactional(readOnly = true)
+    public Map<String, Double> getCustomerOrderSummaryByList(LocalDateTime startDate, Double minOrderAmount) {
+            return customerRepository.findCustomerWithOrderUsingList(startDate)
+                    .stream()
+                    .flatMap(customer -> customer.getOrders().stream()
+                            .filter(order -> order.getAmount() >= minOrderAmount)
+                            .map(order -> new AbstractMap.SimpleEntry<>(customer.getName(), order.getAmount())))
+                    .collect(Collectors.groupingBy(
+                            AbstractMap.SimpleEntry::getKey,
+                            Collectors.summingDouble(AbstractMap.SimpleEntry::getValue)
+                    ));
     }
 }

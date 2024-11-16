@@ -18,17 +18,32 @@ import java.util.Map;
 public class CustomerOrderController {
     private final CustomerOrderService customerOrderService;
 
-    @GetMapping("/order")
+    @GetMapping("/get-orders-by-stream")
     public ResponseEntity<Map<String, Double>> getCustomerOderSummary(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
             @RequestParam Double minOrderAmount
     ) {
 
         long startTime = System.nanoTime();
-        Map<String, Double> orderSummary = customerOrderService.getCustomerOrderSummary(startDate, minOrderAmount);
+        Map<String, Double> orderSummary = customerOrderService.getCustomerOrderSummaryByStream(startDate, minOrderAmount);
         long endTime = System.nanoTime();
 
         System.out.println("Stream execution time: " + (endTime - startTime) / 1_000_000 + " ms");
+
+        return ResponseEntity.ok(orderSummary);
+    }
+
+    @GetMapping("/get-orders-by-list")
+    public ResponseEntity<Map<String, Double>> getCustomerOderSummaryByList(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+            @RequestParam Double minOrderAmount
+    ) {
+
+        long startTime = System.nanoTime();
+        Map<String, Double> orderSummary = customerOrderService.getCustomerOrderSummaryByList(startDate, minOrderAmount);
+        long endTime = System.nanoTime();
+
+        System.out.println("List execution time: " + (endTime - startTime) / 1_000_000 + " ms");
 
         return ResponseEntity.ok(orderSummary);
     }

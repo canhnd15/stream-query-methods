@@ -19,5 +19,12 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
     @QueryHints(
             @QueryHint(name = AvailableHints.HINT_FETCH_SIZE, value = "25")
     )
-    Stream<Customer> findCustomerWithOrders(@Param("startDate") LocalDateTime startDate);
+    Stream<Customer> findCustomerWithOrdersWithStream(@Param("startDate") LocalDateTime startDate);
+
+    @Query(
+            """
+                       SELECT c FROM tbl_customer c JOIN FETCH c.orders o WHERE o.orderDate >= :startDate
+                    """
+    )
+    List<Customer> findCustomerWithOrderUsingList(@Param("startDate") LocalDateTime startDate);
 }
